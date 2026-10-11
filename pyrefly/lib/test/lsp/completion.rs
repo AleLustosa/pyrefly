@@ -4834,7 +4834,6 @@ def users() -> None:
     );
 }
 
-
 #[test]
 fn dataframe_column_completion_from_lazy_groupby_agg() {
     let code = r#"
@@ -4863,8 +4862,5 @@ obj = Custom()
 obj.group_by("category").agg("")
 #                             ^
 "#;
-    assert_eq!(
-        polars_column_completion_labels(code),
-        Vec::<String>::new()
-    );
+    assert_eq!(polars_column_completion_labels(code), Vec::<String>::new());
 }
