@@ -619,7 +619,8 @@ impl<'a> Transaction<'a> {
                             ArgumentSlot::Positional,
                             true,
                         )
-                    }) == Some(true)
+                    })
+                    == Some(true)
             {
                 return Some(group_attr.value.as_ref());
             }
