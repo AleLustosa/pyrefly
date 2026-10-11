@@ -639,6 +639,19 @@ df.select("")
 }
 
 #[test]
+fn dataframe_column_completion_from_inline_groupby_agg() {
+    let code = r#"
+import polars as pl
+df = pl.DataFrame({"nm_produto": ["A"], "volume": [2]})
+df.group_by("nm_produto").agg(pl.col(""))
+#                                     ^
+"#;
+    assert_eq!(
+        polars_column_completion_labels(code),
+        vec!["nm_produto".to_owned(), "volume".to_owned()]
+    );
+}
+#[test]
 fn dataframe_column_completion_from_nested_call_argument() {
     let code = r#"
 import polars as pl

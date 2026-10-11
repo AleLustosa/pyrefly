@@ -602,6 +602,27 @@ impl<'a> Transaction<'a> {
             let Expr::Attribute(attr) = call.func.as_ref() else {
                 continue;
             };
+            // In an inline Polars df.group_by(...).agg(...), the GroupBy
+            // receiver is generic. Recover the original DataFrame schema
+            // for column-name completion inside the aggregation.
+            if attr.attr.id.as_str() == "agg"
+                && matches!(slot, ArgumentSlot::Positional | ArgumentSlot::Keyword(_))
+                && let Expr::Call(group_call) = attr.value.as_ref()
+                && let Expr::Attribute(group_attr) = group_call.func.as_ref()
+                && group_attr.attr.id.as_str() == "group_by"
+                && self
+                    .get_type_trace(handle, group_attr.value.range())
+                    .and_then(|ty| {
+                        Self::dataframe_slot_permitted(
+                            &ty,
+                            "select",
+                            ArgumentSlot::Positional,
+                            true,
+                        )
+                    }) == Some(true)
+            {
+                return Some(group_attr.value.as_ref());
+            }
             let Some(permitted) = self
                 .get_type_trace(handle, attr.value.range())
                 .and_then(|ty| {
