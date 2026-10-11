@@ -1,0 +1,25 @@
+﻿name: Test Polars GroupBy Autocomplete
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Check formatting
+        run: cargo fmt --all -- --check
+
+      - name: Run Polars autocomplete tests
+        run: cargo test -p pyrefly --lib dataframe_column_completion -- --nocapture
