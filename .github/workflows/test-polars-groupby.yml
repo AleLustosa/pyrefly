@@ -1,4 +1,4 @@
-﻿name: Test Polars GroupBy Autocomplete
+name: Test Polars GroupBy Autocomplete
 
 on:
   workflow_dispatch:
@@ -22,4 +22,5 @@ jobs:
         run: cargo fmt --all -- --check
 
       - name: Run Polars autocomplete tests
-        run: cargo test -p pyrefly --lib dataframe_column_completion_from_lazy_groupby_agg -- --nocapture
+        run: cargo test -p pyrefly --lib dataframe_column_completion -- --nocapture
+
