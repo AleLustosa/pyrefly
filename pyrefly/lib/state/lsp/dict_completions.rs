@@ -624,6 +624,31 @@ impl<'a> Transaction<'a> {
             {
                 return Some(group_attr.value.as_ref());
             }
+            // Recover the original frame through an inline .lazy() conversion.
+            if attr.attr.id.as_str() == "agg"
+                && matches!(slot, ArgumentSlot::Positional | ArgumentSlot::Keyword(_))
+                && let Expr::Call(group_call) = attr.value.as_ref()
+                && let Expr::Attribute(group_attr) = group_call.func.as_ref()
+                && group_attr.attr.id.as_str() == "group_by"
+                && let Expr::Call(lazy_call) = group_attr.value.as_ref()
+                && lazy_call.arguments.args.is_empty()
+                && lazy_call.arguments.keywords.is_empty()
+                && let Expr::Attribute(lazy_attr) = lazy_call.func.as_ref()
+                && lazy_attr.attr.id.as_str() == "lazy"
+                && self
+                    .get_type_trace(handle, lazy_attr.value.range())
+                    .and_then(|ty| {
+                        Self::dataframe_slot_permitted(
+                            &ty,
+                            "select",
+                            ArgumentSlot::Positional,
+                            true,
+                        )
+                    })
+                    == Some(true)
+            {
+                return Some(lazy_attr.value.as_ref());
+            }
             let Some(permitted) = self
                 .get_type_trace(handle, attr.value.range())
                 .and_then(|ty| {
